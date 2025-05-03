@@ -62,6 +62,7 @@ def generate_page(from_path, template_path, dest_path, basepath):
     html_page = html_page.replace('href="/', 'href="' + basepath).replace('src="/', 'src="' + basepath)
 
     dest_dir_path = os.path.dirname(dest_path)
+    print(dest_dir_path)
     if dest_dir_path != "":
           os.makedirs(dest_dir_path, exist_ok=True)
     
@@ -71,12 +72,15 @@ def generate_page(from_path, template_path, dest_path, basepath):
 
 def generate_page_recursive(dir_path_content, template_path, dest_dir_path, basepath):
       content_tree = os.listdir(dir_path_content)    
-      
+      print(content_tree, dest_dir_path)
+
       for node in content_tree:
             node_filepath = os.path.join(dir_path_content, node)
             dest_filepath = os.path.join(dest_dir_path, node)
-            if os.path.isfile(node_filepath) and ".md" in node_filepath:
-                  dest_filepath = Path(dest_filepath).with_suffix(".html")
+            print(dest_filepath)
+            if os.path.isfile(node_filepath):
+                  dest_filepath = dest_filepath[:-2] + "html"
+                  print(dest_filepath)
                   generate_page(node_filepath, template_path, dest_filepath, basepath)
             else:
                 generate_page_recursive(node_filepath, template_path, dest_filepath, basepath)
