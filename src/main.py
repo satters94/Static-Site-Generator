@@ -6,6 +6,7 @@ from htmlnode import HTMLNode
 from htmlnode import LeafNode
 from markdown_blocks import markdown_to_html_node
 from inline_markdown import extract_title
+from pathlib import Path
 
 import sys
 
@@ -14,16 +15,14 @@ static_filepath = "./static"
 content_filepath = "./content"
 template_filepath = "./template.html"
 docs_filepath = "./docs"
-
-try:
-    if sys.argv[1]:
-        basepath = sys.argv[1]
-except:
-    basepath = "/"
-print(basepath)
+default_basepath = "/"
 
 
 def main():
+    basepath = default_basepath
+    if len(sys.argv) > 1:
+        basepath = sys.argv[1]
+
     src_to_dest(static_filepath, docs_filepath)
     generate_page_recursive(content_filepath, template_filepath, docs_filepath, basepath)
 
@@ -47,11 +46,6 @@ def src_to_dest(src_path, dest_path):
 
 def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
-    
-    if basepath != "/":
-         from_path = basepath + from_path[2:]
-         template = basepath + template_path[2:]
-         dest_path = basepath + dest_path[2:]
 
     from_file = open(from_path, "r")
     markdown = from_file.read()
@@ -65,7 +59,7 @@ def generate_page(from_path, template_path, dest_path, basepath):
 
     title = extract_title(markdown)
     html_page = template.replace("{{ Title }}", title).replace("{{ Content }}", html_string)
-    html_page = html_page.replace("`href=`/", f"`href=`{basepath}").replace("`src=`/", f"`src=`{basepath}")
+    html_page = html_page.replace('href="/', 'href="' + basepath).replace('src="/', 'src="' + basepath)
 
     dest_dir_path = os.path.dirname(dest_path)
     if dest_dir_path != "":
@@ -76,17 +70,13 @@ def generate_page(from_path, template_path, dest_path, basepath):
             file.close()
 
 def generate_page_recursive(dir_path_content, template_path, dest_dir_path, basepath):
+      content_tree = os.listdir(dir_path_content)    
       
-      if basepath != "/":
-         dir_path_content = basepath + dir_path_content[2:]
-         template_path = basepath + template_path[2:]
-         dest_dir_path = basepath + dest_dir_path[2:]
-    
-      content_tree = os.listdir(dir_path_content)
       for node in content_tree:
             node_filepath = os.path.join(dir_path_content, node)
+            dest_filepath = os.path.join(dest_dir_path, node)
             if os.path.isfile(node_filepath) and ".md" in node_filepath:
-                  dest_filepath = os.path.join(dest_dir_path, node[:-2]+"html")
+                  dest_filepath = Path(dest_filepath).with_suffix(".html")
                   generate_page(node_filepath, template_path, dest_filepath, basepath)
             else:
                 dest_filepath = os.path.join(dest_dir_path, node)
