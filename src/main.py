@@ -79,7 +79,6 @@ def generate_page_recursive(dir_path_content, template_path, dest_dir_path, base
                   dest_filepath = Path(dest_filepath).with_suffix(".html")
                   generate_page(node_filepath, template_path, dest_filepath, basepath)
             else:
-                dest_filepath = os.path.join(dest_dir_path, node)
                 generate_page_recursive(node_filepath, template_path, dest_filepath, basepath)
 
 
